@@ -5,6 +5,7 @@
 :root { --bg: #fafafa; --fg: #0a0a0a; --grid: rgba(0,0,0,.07); }
 .dark { --bg: #07070a; --fg: #f4f4f5; --grid: rgba(255,255,255,.07); }
 html { scroll-behavior: smooth; }
+body { overflow-x: hidden; }
 body { background: var(--bg); color: var(--fg); }
 .grid-bg {
   background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);

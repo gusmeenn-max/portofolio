@@ -40,7 +40,7 @@ export default function TechStack() {
                 <motion.div key={s.name} animate={{ y: [0, -7, 0], rotate: [0, 1.5, -1.5, 0] }} transition={{ duration: 4 + (k % 4) * 0.6, repeat: Infinity, ease: "easeInOut", delay: (k % 5) * 0.25 }}>
                   <motion.div
                     whileHover={{ scale: 1.14, rotate: k % 2 ? -8 : 8, boxShadow: `0 0 28px ${glow}99` }}
-                    whileTap={{ scale: 0.95 }}
+                    whileTap={{ scale: 1.12, rotate: k % 2 ? -10 : 10, boxShadow: `0 0 28px ${glow}99` }}
                     transition={{ type: "spring", stiffness: 300, damping: 12 }}
                     className="flex items-center gap-3 rounded-2xl border border-black/10 bg-black/[.03] px-4 py-3 dark:border-white/10 dark:bg-white/[.04]"
                   >

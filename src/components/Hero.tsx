@@ -28,7 +28,7 @@ export default function Hero() {
   }
 
   return (
-    <section onMouseMove={onMove} onMouseLeave={() => { mx.set(0); my.set(0); }} className="relative h-screen min-h-[680px] overflow-hidden">
+    <section onMouseMove={onMove} onMouseLeave={() => { mx.set(0); my.set(0); }} className="relative h-[100svh] min-h-[620px] overflow-hidden">
       {/* Layer 1: grid + glow */}
       <div className="grid-bg absolute inset-0" />
       <div className="glow absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-500/30 blur-3xl" />
@@ -41,7 +41,7 @@ export default function Hero() {
         <motion.div
           animate={{ x: ["0%", "-50%"] }}
           transition={{ duration: 36, ease: "linear", repeat: Infinity }}
-          className="flex w-max whitespace-nowrap text-[20vw] font-bold leading-none tracking-tighter"
+          className="flex w-max whitespace-nowrap text-[26vw] font-bold leading-none tracking-tighter sm:text-[20vw]"
         >
           {[0, 1].map((i) => (
             <span key={i} className="pr-[4vw]" style={{ WebkitTextStroke: "1.5px var(--fg)", color: "transparent" }}>{NAME}</span>
@@ -53,7 +53,7 @@ export default function Hero() {
       <motion.div style={{ x: imgX, y: imgY }} className="absolute bottom-0 left-1/2 z-10 h-[82%] -translate-x-1/2">
         {imgOk ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src="/profile.png" alt={`Foto ${PROFILE.name}`} onError={() => setImgOk(false)} className="h-full w-auto object-contain object-bottom drop-shadow-2xl" />
+          <img src="/profile.png" alt={`Foto ${PROFILE.name}`} onError={() => setImgOk(false)} className="h-full w-auto max-w-[100vw] object-contain object-bottom drop-shadow-2xl" />
         ) : (
           <div className="grid h-full w-[min(70vw,380px)] place-items-center rounded-t-[999px] border border-dashed border-black/20 bg-black/5 p-8 text-center text-sm opacity-70 dark:border-white/20 dark:bg-white/5">
             Taruh foto PNG cutout di public/profile.png
@@ -62,7 +62,7 @@ export default function Hero() {
       </motion.div>
 
       {/* Layer 4: tombol */}
-      <div className="absolute inset-x-0 bottom-8 z-20 mx-auto flex max-w-6xl justify-center px-6 sm:justify-end">
+      <div className="absolute inset-x-0 bottom-6 z-20 sm:bottom-8 mx-auto flex max-w-6xl justify-center px-6 sm:justify-end">
         <div className="flex flex-wrap justify-center gap-3 text-sm font-semibold">
           <motion.button whileHover={{ y: -3 }} whileTap={{ scale: 0.96 }} onClick={() => setCv(true)} className="inline-flex items-center gap-2 rounded-xl border border-indigo-400/60 bg-indigo-500/15 px-5 py-2.5 backdrop-blur-md"><FileText size={15} /> CV</motion.button>
           <motion.a whileHover={{ y: -3 }} whileTap={{ scale: 0.96 }} href="#contact" className="rounded-xl border border-black/15 bg-[var(--bg)]/60 px-5 py-2.5 backdrop-blur-md dark:border-white/15">Hubungi saya</motion.a>
@@ -70,7 +70,8 @@ export default function Hero() {
       </div>
 
       <Modal open={cv} onClose={() => setCv(false)} title="Curriculum Vitae" wide>
-        <iframe src={PROFILE.cvUrl} title="CV" className="h-[65vh] w-full rounded-lg border border-black/10 dark:border-white/10" />
+        <iframe src={PROFILE.cvUrl} title="CV" className="hidden h-[65vh] w-full rounded-lg border border-black/10 dark:border-white/10 md:block" />
+        <p className="text-sm opacity-70 md:hidden">Pratinjau PDF sering tidak tampil di browser HP. Buka atau unduh CV lewat tombol di bawah.</p>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
           <a href={PROFILE.cvUrl} download="CV-Agus-Abdurrahman.pdf" className="inline-flex items-center gap-2 rounded-xl bg-[var(--fg)] px-4 py-2 text-[var(--bg)]"><Download size={15} /> Unduh CV</a>
           <a href={PROFILE.cvUrl} target="_blank" rel="noopener" className="rounded-xl border border-black/15 px-4 py-2 dark:border-white/15">Buka di tab baru</a>

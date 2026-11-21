@@ -20,7 +20,7 @@ function Shot({ src, alt, initial, natural, onRatio }: {
       ref={ref} src={src} alt={alt} draggable={false}
       onLoad={(e) => onRatio?.(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight)}
       onError={() => setOk(false)}
-      className={natural ? "max-h-[62vh] w-auto max-w-full" : "h-full w-full object-contain"}
+      className={natural ? "max-h-[60dvh] w-auto max-w-full" : "h-full w-full object-contain"}
     />
   ) : (
     <div className={`grid place-items-center bg-gradient-to-br from-indigo-500/40 to-emerald-400/30 text-5xl font-bold ${natural ? "aspect-video w-full" : "h-full w-full"}`}>{initial}</div>
@@ -41,16 +41,25 @@ function Gallery({ p }: { p: Project }) {
   });
   return (
     <div>
-      <div className="relative flex min-h-[200px] items-center justify-center overflow-hidden rounded-xl bg-black/5 dark:bg-white/5">
+      <div className="relative flex min-h-[180px] items-center justify-center overflow-hidden rounded-xl bg-black/5 dark:bg-white/5">
         <AnimatePresence mode="wait">
-          <motion.div key={i} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.25 }} className="flex w-full justify-center">
+          <motion.div
+            key={i}
+            drag={n > 1 ? "x" : false} dragConstraints={{ left: 0, right: 0 }} dragElastic={0.2}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -50 || info.velocity.x < -400) go(1);
+              else if (info.offset.x > 50 || info.velocity.x > 400) go(-1);
+            }}
+            initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.25 }}
+            className="flex w-full touch-pan-y justify-center"
+          >
             <Shot natural src={p.gallery[i].src} alt={p.gallery[i].caption} initial={p.title[0]} />
           </motion.div>
         </AnimatePresence>
         {n > 1 && (
           <>
-            <button aria-label="Sebelumnya" onClick={() => go(-1)} className="absolute left-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80"><ChevronLeft size={18} /></button>
-            <button aria-label="Berikutnya" onClick={() => go(1)} className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80"><ChevronRight size={18} /></button>
+            <button aria-label="Sebelumnya" onClick={() => go(-1)} className="absolute left-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80 sm:left-3"><ChevronLeft size={18} /></button>
+            <button aria-label="Berikutnya" onClick={() => go(1)} className="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80 sm:right-3"><ChevronRight size={18} /></button>
           </>
         )}
       </div>
@@ -76,18 +85,22 @@ function Chips({ items, center }: { items: string[]; center?: boolean }) {
   );
 }
 
-// Satu kartu di carousel. Ukurannya mengikuti rasio asli gambar.
-function Slide({ q, o, step, onSelect }: { q: Project; o: number; step: number; onSelect: () => void }) {
+// Satu kartu di carousel. Ukurannya mengikuti rasio asli gambar dan selalu muat di layar.
+function Slide({ q, o, step, box, onSelect }: { q: Project; o: number; step: number; box: { w: number; h: number }; onSelect: () => void }) {
   const [ratio, setRatio] = useState(16 / 10);
   const a = Math.abs(o);
+  const maxW = box.w * 0.82;
+  let h = box.h;
+  let wd = h * ratio;
+  if (wd > maxW) { wd = maxW; h = wd / ratio; }
   return (
-    <div className="pointer-events-none absolute inset-0 flex justify-center" style={{ zIndex: Math.max(0, 10 - a) }}>
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center" style={{ zIndex: Math.max(0, 10 - a) }}>
       <motion.div
         animate={{ x: o * step, scale: 1 - a * 0.16, rotateY: -o * 26, opacity: a > 2 ? 0 : 1 - a * 0.22 }}
         transition={{ type: "spring", stiffness: 180, damping: 24 }}
-        style={{ transformPerspective: 1100, aspectRatio: ratio }}
+        style={{ transformPerspective: 1100, width: wd, height: h }}
         onTap={onSelect}
-        className={`relative h-full max-w-[82%] overflow-hidden rounded-2xl border border-black/10 shadow-2xl dark:border-white/10 ${a > 2 ? "pointer-events-none" : "pointer-events-auto"}`}
+        className={`relative shrink-0 overflow-hidden rounded-2xl border border-black/10 shadow-2xl dark:border-white/10 ${a > 2 ? "pointer-events-none" : "pointer-events-auto"}`}
       >
         <Shot src={q.gallery[0].src} alt={q.title} initial={q.title[0]} onRatio={setRatio} />
         <motion.div animate={{ opacity: o === 0 ? 0 : 0.5 }} className="pointer-events-none absolute inset-0 bg-black" />
@@ -101,20 +114,21 @@ export default function Projects({ projects }: { projects: Project[] }) {
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
-  const [w, setW] = useState(900);
+  const [box, setBox] = useState({ w: 900, h: 360 });
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setW(el.clientWidth));
+    const measure = () => setBox({ w: el.clientWidth, h: el.clientHeight });
+    const ro = new ResizeObserver(measure);
     ro.observe(el);
-    setW(el.clientWidth);
+    measure();
     return () => ro.disconnect();
   }, []);
   if (!n) return null;
 
   const go = (d: number) => setActive((a) => (a + d + n) % n);
   const p = projects[active];
-  const step = w * (w < 640 ? 0.42 : 0.3);
+  const step = box.w * (box.w < 640 ? 0.4 : 0.3);
   const offsetOf = (i: number) => {
     let d = i - active;
     if (d > n / 2) d -= n;
@@ -123,28 +137,28 @@ export default function Projects({ projects }: { projects: Project[] }) {
   };
 
   return (
-    <section id="projects" className="mx-auto max-w-6xl px-6 py-20">
+    <section id="projects" className="mx-auto max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
       <p className="mb-2 font-mono text-xs tracking-[.3em] opacity-50">SELECTED WORK</p>
       <h2 className="text-4xl font-bold tracking-tight">Project</h2>
-      <p className="mt-2 max-w-xl opacity-70">Kumpulan sistem dan proyek yang pernah saya bangun. Geser atau klik kartu untuk memilih proyek.</p>
+      <p className="mt-2 max-w-xl opacity-70">Kumpulan sistem dan proyek yang pernah saya bangun. Geser atau ketuk kartu untuk memilih proyek.</p>
 
       <div
         tabIndex={0} aria-roledescription="carousel" aria-label="Daftar proyek"
         onKeyDown={(e) => { if (e.key === "ArrowLeft") go(-1); if (e.key === "ArrowRight") go(1); }}
-        className="relative mt-12 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+        className="relative mt-10 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 sm:mt-12"
       >
         <motion.div
           ref={stageRef}
           drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.15}
           onDragEnd={(_, info) => {
-            if (info.offset.x < -60 || info.velocity.x < -400) go(1);
-            else if (info.offset.x > 60 || info.velocity.x > 400) go(-1);
+            if (info.offset.x < -50 || info.velocity.x < -400) go(1);
+            else if (info.offset.x > 50 || info.velocity.x > 400) go(-1);
           }}
-          className="relative h-[230px] cursor-grab touch-pan-y active:cursor-grabbing sm:h-[300px] md:h-[360px]"
+          className="relative h-[220px] cursor-grab touch-pan-y active:cursor-grabbing sm:h-[300px] md:h-[360px]"
         >
           {projects.map((q, i) => {
             const o = offsetOf(i);
-            return <Slide key={q.id} q={q} o={o} step={step} onSelect={() => (o === 0 ? setOpen(true) : Math.abs(o) <= 2 && setActive(i))} />;
+            return <Slide key={q.id} q={q} o={o} step={step} box={box} onSelect={() => (o === 0 ? setOpen(true) : Math.abs(o) <= 2 && setActive(i))} />;
           })}
         </motion.div>
         {n > 1 && (
@@ -156,10 +170,10 @@ export default function Projects({ projects }: { projects: Project[] }) {
       </div>
 
       <AnimatePresence mode="wait">
-        <motion.div key={p.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="mx-auto mt-10 max-w-2xl text-center">
+        <motion.div key={p.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="mx-auto mt-8 max-w-2xl text-center sm:mt-10">
           <h3 className="text-2xl font-bold tracking-tight sm:text-3xl">{p.title}</h3>
           {p.tagline && <p className="mt-1 text-sm text-indigo-500 dark:text-indigo-300">{p.tagline}</p>}
-          {p.description && <p className="mt-4 opacity-80">{p.description}</p>}
+          {p.description && <p className="mt-4 text-sm opacity-80 sm:text-base">{p.description}</p>}
           {p.purpose && (
             <div className="mt-5 rounded-xl border border-black/10 bg-black/[.03] p-4 dark:border-white/10 dark:bg-white/[.04]">
               <p className="mb-1 font-mono text-[10px] tracking-[.25em] opacity-50">TUJUAN PROJECT</p>
@@ -167,7 +181,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
             </div>
           )}
           {p.techStack.length > 0 && <div className="mt-4"><Chips items={p.techStack} center /></div>}
-          <button onClick={() => setOpen(true)} className="mt-6 text-sm font-semibold underline underline-offset-4 transition hover:opacity-70">Lihat detail dan foto →</button>
+          <button onClick={() => setOpen(true)} className="mt-6 px-2 py-2 text-sm font-semibold underline underline-offset-4 transition hover:opacity-70">Lihat detail dan foto →</button>
         </motion.div>
       </AnimatePresence>
 
