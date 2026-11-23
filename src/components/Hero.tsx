@@ -50,10 +50,10 @@ export default function Hero() {
       </motion.div>
 
       {/* Layer 3: foto cutout di tengah, menutupi sebagian teks */}
-      <motion.div style={{ x: imgX, y: imgY }} className="absolute bottom-0 left-1/2 z-10 h-[82%] -translate-x-1/2">
+      <motion.div style={{ x: imgX, y: imgY }} className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex h-[82%] items-end justify-center">
         {imgOk ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src="/profile.png" alt={`Foto ${PROFILE.name}`} onError={() => setImgOk(false)} className="h-full w-auto max-w-[100vw] object-contain object-bottom drop-shadow-2xl" />
+          <img src="/profile.png" alt={`Foto ${PROFILE.name}`} onError={() => setImgOk(false)} className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-2xl" />
         ) : (
           <div className="grid h-full w-[min(70vw,380px)] place-items-center rounded-t-[999px] border border-dashed border-black/20 bg-black/5 p-8 text-center text-sm opacity-70 dark:border-white/20 dark:bg-white/5">
             Taruh foto PNG cutout di public/profile.png

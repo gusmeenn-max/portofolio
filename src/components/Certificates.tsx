@@ -19,7 +19,7 @@ function Detail({ c }: { c: Certificate }) {
   const [tab, setTab] = useState<"cert" | "materi">("cert");
   const src = tab === "cert" ? c.image : c.imageDetail ?? c.image;
   return (
-    <div className="grid gap-6 md:grid-cols-[minmax(0,340px)_1fr]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
       <div>
         {c.imageDetail && (
           <div className="mb-3 flex gap-2 text-sm">

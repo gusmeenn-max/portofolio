@@ -20,7 +20,7 @@ function Shot({ src, alt, initial, natural, onRatio }: {
       ref={ref} src={src} alt={alt} draggable={false}
       onLoad={(e) => onRatio?.(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight)}
       onError={() => setOk(false)}
-      className={natural ? "max-h-[60dvh] w-auto max-w-full" : "h-full w-full object-contain"}
+      className={natural ? "max-h-[42dvh] w-auto max-w-full sm:max-h-[60dvh]" : "h-full w-full object-contain"}
     />
   ) : (
     <div className={`grid place-items-center bg-gradient-to-br from-indigo-500/40 to-emerald-400/30 text-5xl font-bold ${natural ? "aspect-video w-full" : "h-full w-full"}`}>{initial}</div>
@@ -40,7 +40,7 @@ function Gallery({ p }: { p: Project }) {
     return () => window.removeEventListener("keydown", onKey);
   });
   return (
-    <div>
+    <div className="min-w-0">
       <div className="relative flex min-h-[180px] items-center justify-center overflow-hidden rounded-xl bg-black/5 dark:bg-white/5">
         <AnimatePresence mode="wait">
           <motion.div
@@ -65,7 +65,7 @@ function Gallery({ p }: { p: Project }) {
       </div>
       <p className="mt-3 text-sm font-semibold">{p.gallery[i].caption} {n > 1 && <span className="font-normal opacity-50">({i + 1}/{n})</span>}</p>
       {n > 1 && (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-3 flex max-w-full gap-2 overflow-x-auto pb-1">
           {p.gallery.map((g, k) => (
             <button key={g.src} onClick={() => setI(k)} aria-label={`Foto ${k + 1}`} className={`h-14 w-24 shrink-0 overflow-hidden rounded-lg border-2 bg-black/5 transition dark:bg-white/5 ${k === i ? "border-indigo-400" : "border-transparent opacity-60 hover:opacity-100"}`}>
               <Shot src={g.src} alt="" initial={String(k + 1)} />
@@ -186,9 +186,9 @@ export default function Projects({ projects }: { projects: Project[] }) {
       </AnimatePresence>
 
       <Modal open={open} onClose={() => setOpen(false)} title={p.title} wide>
-        <div className="grid gap-6">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 sm:gap-6">
           <Gallery key={p.id} p={p} />
-          <div className="grid gap-6 md:grid-cols-[1.4fr_1fr]">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:gap-6">
             <div>
               {(p.tagline || p.description || p.details.length > 0) && <p className="mb-2 font-mono text-[10px] tracking-[.25em] opacity-50">TENTANG PROJECT</p>}
               {p.tagline && <p className="text-sm text-indigo-500 dark:text-indigo-300">{p.tagline}</p>}
